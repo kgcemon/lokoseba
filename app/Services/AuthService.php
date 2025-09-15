@@ -46,22 +46,12 @@ class AuthService
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
             'phone'    => 'required|string|unique:users,phone',
-            'image'    => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'password' => 'required|string|min:4',
             'division' => 'required|string|max:255',
             'district' => 'required|string|max:255',
             'area'     => 'required|string|max:255',
         ]);
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('users', 'public');
-        }else{
-            return response()->json([
-                'error' => true,
-                'msg' => 'Image not uploaded'
-            ]);
-        }
 
         // Create user
         $user = User::create([
@@ -71,7 +61,6 @@ class AuthService
             'division' => $validated['division'],
             'district' => $validated['district'],
             'area'     => $validated['area'],
-            'image'    => $imagePath,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -87,7 +76,7 @@ class AuthService
 
 public function providerRegister($request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'name'     => 'required|string|max:255',
             'phone'    => 'required|string|unique:users,phone',
             'selfie'    => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -97,6 +86,10 @@ public function providerRegister($request)
             'area'     => 'required|string|max:255',
             'nid_front' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'nid_back' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'store_license' => 'required|string',
+            'store_name' => 'required|string',
+            'store_address' => 'required|string',
+            'store_phone' => 'required|string',
         ]);
 
         $selfiePath   = isset($credentials['selfie'])   ? $credentials['selfie']->store('providers/selfies', 'public') : null;
@@ -114,6 +107,10 @@ public function providerRegister($request)
             'selfie'     => $selfiePath,
             'nid_front'  => $nidFrontPath,
             'nid_back'   => $nidBackPath,
+            'store_license' => $credentials['store_license'],
+            'store_name'  => $credentials['store_name'],
+            'store_address' => $credentials['store_address'],
+            'store_phone' => $credentials['store_phone'],
         ]);
 
         // Generate token

@@ -32,6 +32,7 @@ return new class extends Migration
             $table->string('selfie')->nullable();
             $table->string('nid_front')->nullable();
             $table->string('nid_back')->nullable();
+            $table->boolean('approved')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
