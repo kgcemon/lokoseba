@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/categories', [CategiriesController::class, 'index']);
+Route::get('/banner', [CategiriesController::class, 'banner_images']);
 
 //auth needed Route
 Route::middleware('auth:sanctum')->group(function () {
