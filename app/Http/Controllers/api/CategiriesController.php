@@ -17,7 +17,7 @@ class CategiriesController extends Controller
         ]);
     }
 
-    public function banner_images()
+    public function bannerImages()
     {
         $data = Banner::all();
         return response()->json([
