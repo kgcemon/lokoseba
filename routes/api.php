@@ -1,8 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\AuthController;
-use App\Http\Controllers\CategiriesController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\api\CategiriesController;
 use Illuminate\Support\Facades\Route;
 
 
