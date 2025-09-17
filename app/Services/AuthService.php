@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
+
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -22,11 +22,12 @@ class AuthService
               'msg' => 'Invalid credentials'
           ]);
         }
-
+        $token = $user->createToken('auth_token')->plainTextToken;
         if (!$user->verified || !$user->profile_complete) {
             return response()->json([
                 'error' => true,
-                'msg' => 'Your account is not verified'
+                'msg' => 'Your account is not verified',
+                'token' => $token,
             ],322);
         }
 
@@ -61,6 +62,7 @@ class AuthService
             'division' => $validated['division'],
             'district' => $validated['district'],
             'area'     => $validated['area'],
+            'role'     => 'user',
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -111,6 +113,7 @@ public function providerRegister($request)
             'store_name'  => $credentials['store_name'],
             'store_address' => $credentials['store_address'],
             'store_phone' => $credentials['store_phone'],
+            'role'        => 'provider',
         ]);
 
         // Generate token

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Otp;
 use App\Services\AuthService;
+use App\Services\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,10 +13,12 @@ class AuthController extends Controller
 {
 
     protected $authService;
+    public $otpService;
 
-    public function __construct(AuthService $authService)
+    public function __construct(AuthService $authService, OtpService $otpService)
     {
         $this->authService = $authService;
+        $this->otpService = $otpService;
     }
 
 
@@ -46,14 +50,18 @@ class AuthController extends Controller
             'password' => 'required|string|min:4',
         ]);
 
-        $result = $this->authService->login($validated);
-
-        return response()->json($result);
+        return $this->authService->login($validated);
     }
 
     public function user(Request $request)
     {
         $user = $request->user();
+        if (!$user->verified) {
+            return response()->json([
+                'error'=> true,
+                'message'=> 'User not verified'
+            ]);
+        }
         return response()->json([
             'error'=> false,
             'message'=> 'user',
@@ -62,4 +70,34 @@ class AuthController extends Controller
             ]
         ]);
     }
+
+    public function sendOtp(Request $request)
+    {
+        return $this->otpService->sendOtp($request);
+    }
+
+    public function verifyOtp(Request $request){
+        $validated = $request->validate([
+            'otp' => 'required|string|min:4',
+        ]);
+
+        $user = $request->user();
+
+        $checkOtp = Otp::where('otp', $validated['otp'])->where('user_id', $user->id)->first();
+        if ($checkOtp) {
+            $user->verified = true;
+            $user->save();
+            return response()->json([
+                'error'=> false,
+                'message'=> 'OTP verified, thank you your account now verified'
+            ]);
+        }
+        return response()->json([
+            'error'=> true,
+            'message'=> 'OTP not verified'
+        ],422);
+    }
+
+
+
 }

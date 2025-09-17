@@ -13,6 +13,7 @@ Route::get('/banner', [CategiriesController::class, 'bannerImages']);
 
 //auth needed Route
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('send-otp', [AuthController::class, 'sendOtp'])->middleware('throttle:2,1');
+    Route::post('verify', [AuthController::class, 'verifyOtp'])->middleware('throttle:10,1');
     Route::get('/user', [AuthController::class, 'user']);
-
 });
