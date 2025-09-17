@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('division',50);
             $table->string('district',50);
             $table->string('area',120);
-            $table->enum('role', ['admin', 'user','provider'])->default('user');
+            $table->enum('role', ['admin', 'user','provider','consultant '])->default('user');
             $table->boolean('active')->default(false);
             $table->boolean('verified')->default(false);
             $table->boolean('profile_complete')->default(false);
@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('nid_front')->nullable();
             $table->string('nid_back')->nullable();
             $table->boolean('approved')->default(false);
+            $table->string('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

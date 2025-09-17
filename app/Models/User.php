@@ -38,6 +38,7 @@ class User extends Authenticatable
         'nid_front',
         'nid_back',
         'selfie',
+        'fcm_token'
     ];
 
     /**

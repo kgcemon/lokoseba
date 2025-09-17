@@ -4,10 +4,13 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Otp;
+use App\Models\User;
 use App\Services\AuthService;
 use App\Services\OtpService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -21,6 +24,15 @@ class AuthController extends Controller
         $this->otpService = $otpService;
     }
 
+    public function consultant()
+    {
+        $user = User::where('role', 'consultant')->get();
+        return response()->json([
+            'error' => false,
+            'message' => 'data found',
+            'data' => $user
+        ]);
+    }
 
     public function register(Request $request): JsonResponse
     {
@@ -80,13 +92,13 @@ class AuthController extends Controller
         $validated = $request->validate([
             'otp' => 'required|string|min:4',
         ]);
-
         $user = $request->user();
-
-        $checkOtp = Otp::where('otp', $validated['otp'])->where('user_id', $user->id)->first();
+        $checkOtp = Otp::where('otp', $validated['otp'])->where('created_at', '>=', Carbon::now()->subMinutes(5))
+            ->where('user_id', $user->id)->first();
         if ($checkOtp) {
             $user->verified = true;
             $user->save();
+            $checkOtp->delete();
             return response()->json([
                 'error'=> false,
                 'message'=> 'OTP verified, thank you your account now verified'
@@ -98,6 +110,65 @@ class AuthController extends Controller
         ],422);
     }
 
+    public function sendCode(Request $request){
+        $validated = $request->validate([
+            'phone' => 'required|string|max:12|exists:users,phone',
+        ]);
+        try {
+            $apiKey = env('SMS_API_KEY');
+            $senderId = env('SMS_SENDER_KEY');
+            $code = random_int(100000, 999999);
+            $message = "আপনার লোকসেভা ভেরিফাই কোডঃ $code";
+            $phone = $validated['phone'];
+            $user = \App\Models\User::where('phone', $phone)->first();
+            $response = Http::get("https://bulksmsbd.net/api/smsapi?api_key=$apiKey&type=text&number=$phone&senderid=$senderId&message=$message");
+            if ($response->status() == 202) {
+                Otp::create([
+                    'user_id' => $user->id,
+                    'code' => $code,
+                ]);
+            }
+            return response()->json([
+                'error'=> false,
+                'message'=> 'OTP has been sent successfully'
+            ]);
+        }catch (\Exception $exception){
+            return response()->json([
+                'error'=> true,
+                'message'=> $exception->getMessage()
+            ]);
+        }
+    }
+
+    public function updatePassword()
+    {
+        $validated = request()->validate([
+            'password' => 'required|string|min:5',
+            'otp' => 'required|string|min:6',
+            'phone' => 'required|string|max:12|exists:users,phone',
+        ]);
+
+        $user = \App\Models\User::where('phone', $validated['phone'])->first();
+
+        $otp = Otp::where('otp', $validated['otp'])
+            ->where('created_at', '>=', Carbon::now()->subMinutes(5))
+            ->where('user_id', $user->id)->first();
+        if (!$otp){
+            return response()->json([
+                'error'=> true,
+                'message'=> 'OTP not valid'
+            ]);
+        }else{
+            $user->password = bcrypt($validated['password']);
+            $user->save();
+            $otp->delete();
+            return response()->json([
+                'error'=> false,
+                'message'=> 'Password has been updated'
+            ]);
+        }
+
+    }
 
 
 }
