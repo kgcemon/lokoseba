@@ -24,6 +24,25 @@ class AuthController extends Controller
         $this->otpService = $otpService;
     }
 
+
+    public function checkNumber(Request $request)
+    {
+        $validated = $request->validate([
+            'number' => 'required|numeric'
+        ]);
+        $user = User::where('number', $validated['number'])->first();
+        if (!$user) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Number not found'
+            ],423);
+        }
+        return response()->json([
+            'error' => false,
+            'message' => 'Number already have a account',
+        ]);
+    }
+
     public function consultant()
     {
         $user = User::where('role', 'consultant')->get();

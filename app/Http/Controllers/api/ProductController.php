@@ -43,6 +43,15 @@ class ProductController extends Controller
         ]);
     }
 
+    public function userData(Request $request)
+    {
+        $user = $request->user();
+        $totalProduct = Product::where('user_id', $user->id)->count();
+        $totalLiveProduct = Product::where('user_id', $user->id)->where('status', 1)->count();
+
+        return response()->json([]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

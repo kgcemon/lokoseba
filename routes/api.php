@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 //public route
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/check-number', [AuthController::class, 'checkNumber']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/categories', [CategiriesController::class, 'index']);
 Route::get('/banner', [CategiriesController::class, 'bannerImages']);
