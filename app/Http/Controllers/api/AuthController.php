@@ -120,7 +120,7 @@ class AuthController extends Controller
             $code = random_int(100000, 999999);
             $message = "আপনার লোকসেভা ভেরিফাই কোডঃ $code";
             $phone = $validated['phone'];
-            $user = \App\Models\User::where('phone', $phone)->first();
+            $user = User::where('phone', $phone)->first();
             $response = Http::get("https://bulksmsbd.net/api/smsapi?api_key=$apiKey&type=text&number=$phone&senderid=$senderId&message=$message");
             if ($response->status() == 202) {
                 Otp::create([
@@ -148,7 +148,7 @@ class AuthController extends Controller
             'phone' => 'required|string|max:12|exists:users,phone',
         ]);
 
-        $user = \App\Models\User::where('phone', $validated['phone'])->first();
+        $user = User::where('phone', $validated['phone'])->first();
 
         $otp = Otp::where('otp', $validated['otp'])
             ->where('created_at', '>=', Carbon::now()->subMinutes(5))
