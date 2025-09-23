@@ -80,6 +80,7 @@ class ProductController extends Controller
         // Handle image upload
         $path = null;
         if ($request->hasFile('image')) {
+
             $image = $request->file('image');
             $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('public/images', $imageName);
