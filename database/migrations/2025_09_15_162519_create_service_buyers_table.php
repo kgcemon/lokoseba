@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->integer('user_id');
             $table->integer('categories_id');
+            $table->enum('type', ['paid', 'free']);
             $table->boolean('status')->default(true);
+            $table->timestamp('expired_at');
             $table->timestamps();
         });
     }

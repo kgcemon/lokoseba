@@ -25,11 +25,11 @@ class ProductController extends Controller
 
         $Products = Product::where('location', $validate['location'])->
         where('subcategory_id',$validate['subcategory_id'])->
-        with('user')->latest()->paginate(10);
+        with('user')->where('status',1)->latest()->paginate(10);
         if ($Products->isEmpty()) {
             $Products = Product::where('area', $user->area)->
             where('subcategory_id',$validate['subcategory_id'])->
-            with('user')->latest()->paginate(10);
+            with('user')->where('status',1)->latest()->paginate(10);
         }
 
         return response()->json([
@@ -66,6 +66,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validate = $request->validate([
+            'category_id' => 'required|integer',
             'subcategory_id' => 'required|integer|exists:subcategories,id',
             'location' => 'required|string|max:255',
             'description' => 'required|string',
